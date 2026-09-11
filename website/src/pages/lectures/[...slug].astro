@@ -1,0 +1,135 @@
+---
+import DocLayout from '../../layouts/DocLayout.astro';
+import { getCollection, render } from 'astro:content';
+
+const base = import.meta.env.BASE_URL || '/';
+
+export async function getStaticPaths() {
+  const lectures = await getCollection('lectures');
+  return lectures
+    .filter(l => !l.data.draft)
+    .map(lecture => ({
+      params: { slug: lecture.id.replace('.md', '') },
+      props: { lecture },
+    }));
+}
+
+const { lecture } = Astro.props;
+const { Content, headings } = await render(lecture);
+
+const allLectures = await getCollection('lectures');
+const sorted = allLectures
+  .filter(l => !l.data.draft)
+  .sort((a, b) => a.data.lectureNumber - b.data.lectureNumber);
+
+const currentIndex = sorted.findIndex(l => l.data.lectureNumber === lecture.data.lectureNumber);
+const prev = sorted[currentIndex - 1];
+const next = sorted[currentIndex + 1];
+
+const slug = lecture.id.replace('.md', '');
+const num = String(lecture.data.lectureNumber).padStart(2, '0');
+
+// Assignments have their own detail pages (`/assignments/[slug]`); the lecture page
+// just links to the related one(s) in the footer.
+const allAssignments = await getCollection('assignments');
+const relatedAssignment = allAssignments.find(a => a.data.lectureRef === slug && !a.data.draft);
+// Hide the schema's template default ("学号-HWxx.zip") unless the author set a real one.
+const templateFormat = '学号-HWxx.zip';
+---
+
+<DocLayout title={lecture.data.title} headings={headings}>
+  <!-- Chapter header: a large faded serif numeral beside the title block. -->
+  <header class="mt-5 grid items-center gap-6 sm:grid-cols-[5rem_1fr] sm:gap-8">
+    <span
+      class="hidden sm:block font-serif text-6xl font-semibold leading-none tracking-tight text-primary/20 select-none"
+      aria-hidden="true"
+    >
+      {num}
+    </span>
+    <div>
+      <p class="flex items-center gap-2.5 font-mono text-xs tracking-[0.18em] text-ink-muted">
+        <span class="inline-block h-1.5 w-1.5 rotate-45 bg-primary" aria-hidden="true"></span>
+        第 {num} 讲 · 共 {sorted.length} 讲
+      </p>
+      <h1 class="mt-2.5 font-serif text-2xl sm:text-3xl font-semibold tracking-tight leading-snug text-balance">
+        {lecture.data.title}
+      </h1>
+      {lecture.data.slidevUrl && (
+        <a
+          href={lecture.data.slidevUrl}
+          target="_blank"
+          rel="noopener"
+          class="mt-3 inline-flex items-center gap-1.5 font-mono text-xs text-ink-muted hover:text-primary transition-colors"
+        >
+          [课件] 在线讲义
+          <span aria-hidden="true">↗</span>
+        </a>
+      )}
+    </div>
+  </header>
+
+  <!-- Prose is capped to a comfortable reading measure; header/panels span the column. -->
+  <article class="prose-custom mt-7">
+    <Content />
+  </article>
+
+  {relatedAssignment && (
+    <div class="mt-9 bg-primary-soft rounded-lg p-5 sm:p-6">
+      <p class="flex items-center gap-2 font-mono text-xs tracking-[0.18em] text-ink-muted">
+        <span class="inline-block h-1 w-1 rotate-45 bg-primary" aria-hidden="true"></span>
+        课后作业 · 作业 {String(relatedAssignment.data.assignmentNumber).padStart(2, '0')}
+      </p>
+      <div class="mt-3 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-3">
+        <a
+          href={`${base}assignments/${relatedAssignment.id.replace('.md', '')}`}
+          class="group font-serif text-xl font-medium tracking-tight text-primary-dark hover:text-primary transition-colors"
+        >
+          {relatedAssignment.data.title}
+        </a>
+        {relatedAssignment.data.submissionFormat &&
+          relatedAssignment.data.submissionFormat !== templateFormat && (
+            <span class="font-mono text-xs text-ink-muted">
+              {relatedAssignment.data.submissionFormat}
+            </span>
+          )}
+      </div>
+    </div>
+  )}
+
+  <!-- Colophon: a quiet diamond marks the end of the lecture body. -->
+  <div class="mt-12 flex justify-center" aria-hidden="true">
+    <span class="h-2 w-2 rotate-45 bg-primary/30"></span>
+  </div>
+
+  <nav
+    class="mt-5 grid gap-px border border-line rounded-lg overflow-hidden bg-line sm:grid-cols-2"
+    aria-label="上下讲"
+  >
+    {prev ? (
+      <a
+        href={`${base}lectures/${prev.id.replace('.md', '')}`}
+        class="group bg-paper p-5 hover:bg-white transition-colors"
+      >
+        <span class="block font-mono text-xs text-ink-faint">上一讲</span>
+        <span class="mt-2 block font-serif text-lg font-medium leading-snug text-ink group-hover:text-primary-dark transition-colors">
+          {prev.data.title}
+        </span>
+      </a>
+    ) : (
+      <span class="hidden sm:block bg-paper" aria-hidden="true" />
+    )}
+    {next ? (
+      <a
+        href={`${base}lectures/${next.id.replace('.md', '')}`}
+        class="group bg-paper p-5 text-right hover:bg-white transition-colors"
+      >
+        <span class="block font-mono text-xs text-ink-faint">下一讲</span>
+        <span class="mt-2 block font-serif text-lg font-medium leading-snug text-ink group-hover:text-primary-dark transition-colors">
+          {next.data.title}
+        </span>
+      </a>
+    ) : (
+      <span class="hidden sm:block bg-paper" aria-hidden="true" />
+    )}
+  </nav>
+</DocLayout>

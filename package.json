@@ -1,0 +1,15 @@
+{
+  "name": "course-template",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "build:website": "node scripts/sync-website.mjs",
+    "build:slides": "node scripts/sync-slides.mjs",
+    "build:slides:force": "node scripts/sync-slides.mjs --force",
+    "dev:website": "npm --prefix website run dev",
+    "dev:slides": "npm --prefix slides run dev",
+    "dev": "node scripts/serve.mjs",
+    "serve": "node scripts/serve.mjs"
+  }
+}

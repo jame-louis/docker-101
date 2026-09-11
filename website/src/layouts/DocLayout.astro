@@ -1,0 +1,36 @@
+---
+import CourseLayout from './CourseLayout.astro';
+import TableOfContents from '../components/TableOfContents.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  headings?: Array<{ depth: number; slug: string; text: string }>;
+}
+
+const { title, description, headings = [] } = Astro.props;
+
+// Only h2/h3 participate in the inline table of contents.
+const toc = headings.filter(h => h.depth >= 2 && h.depth <= 3);
+---
+
+<CourseLayout title={title} description={description}>
+  <!--
+    The content column is a centered max-w-4xl frame — the same frame as the nav and
+    footer — so markdown content aligns with them on both edges. On xl+ the grid adds
+    a sticky TOC rail in the right gutter without touching the content column.
+  -->
+  <div
+    class="mx-auto w-full max-w-4xl px-4 sm:px-6 lg:px-8 py-6 sm:py-8 xl:max-w-none xl:px-0 xl:grid xl:grid-cols-[1fr_minmax(0,56rem)_1fr]"
+  >
+    <div class="min-w-0 xl:col-start-2 xl:px-8">
+      <slot />
+    </div>
+
+    {toc.length > 0 && (
+      <aside class="hidden xl:block xl:col-start-3 pt-8">
+        <TableOfContents headings={toc} />
+      </aside>
+    )}
+  </div>
+</CourseLayout>

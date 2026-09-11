@@ -1,0 +1,110 @@
+---
+import CourseLayout from '../../layouts/CourseLayout.astro';
+import { getCollection, render } from 'astro:content';
+
+const base = import.meta.env.BASE_URL || '/';
+
+export async function getStaticPaths() {
+  const assignments = await getCollection('assignments');
+  return assignments
+    .filter(a => !a.data.draft)
+    .map(assignment => ({
+      params: { slug: assignment.id.replace('.md', '') },
+      props: { assignment },
+    }));
+}
+
+const { assignment } = Astro.props;
+const { Content } = await render(assignment);
+
+// There is no assignments list page — an assignment lives on its own detail page and is
+// reached from its lecture (homepage + lecture footer), so link back to that lecture.
+const allLectures = await getCollection('lectures');
+const lecture = allLectures.find(
+  l => l.id.replace('.md', '') === assignment.data.lectureRef && !l.data.draft,
+);
+
+const num = String(assignment.data.assignmentNumber).padStart(2, '0');
+// Hide the schema's template default ("学号-HWxx.zip") unless the author set a real one.
+const templateFormat = '学号-HWxx.zip';
+const format =
+  assignment.data.submissionFormat !== templateFormat ? assignment.data.submissionFormat : null;
+---
+
+<CourseLayout title={assignment.data.title}>
+  <!-- Same frame as the nav (max-w-4xl centered) so content left-aligns with it, like the homepage. -->
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <!-- Chapter header: a large faded serif numeral beside the title block. -->
+    <header class="mt-8 grid items-center gap-6 sm:grid-cols-[5.5rem_1fr] sm:gap-10">
+      <span
+        class="hidden sm:block font-serif text-7xl font-semibold leading-none tracking-tight text-primary/20 select-none"
+        aria-hidden="true"
+      >
+        {num}
+      </span>
+      <div>
+        <p class="flex items-center gap-2.5 font-mono text-xs tracking-[0.18em] text-ink-muted">
+          <span class="inline-block h-1.5 w-1.5 rotate-45 bg-primary" aria-hidden="true"></span>
+          作业 {num}
+        </p>
+        <h1 class="mt-3 font-serif text-3xl sm:text-4xl font-semibold tracking-tight leading-snug text-balance">
+          {assignment.data.title}
+        </h1>
+
+        <div class="mt-6 flex flex-wrap items-center gap-x-8 gap-y-4">
+          {assignment.data.dueDate && (
+            <dl>
+              <dt class="font-mono text-xs text-ink-faint">截止</dt>
+              <dd class="mt-1 font-medium tabular-nums">
+                {assignment.data.dueDate.toLocaleDateString('zh-CN')}
+              </dd>
+            </dl>
+          )}
+          {format && (
+            <dl>
+              <dt class="font-mono text-xs text-ink-faint">提交格式</dt>
+              <dd class="mt-1 font-mono text-sm text-ink">{format}</dd>
+            </dl>
+          )}
+          {assignment.data.downloadFile && (
+            <a
+              href={base + assignment.data.downloadFile}
+              download
+              class="inline-flex items-center gap-2 px-5 py-2.5 bg-solid text-white text-sm font-medium rounded-md hover:bg-solid-hover active:scale-[0.98] transition-all duration-200 sm:ml-auto"
+            >
+              下载作业文件
+            </a>
+          )}
+        </div>
+      </div>
+    </header>
+
+    <article class="prose-custom mt-10">
+      <Content />
+    </article>
+
+    <!-- Colophon: a quiet diamond marks the end of the assignment body. -->
+    <div class="mt-16 flex justify-center" aria-hidden="true">
+      <span class="h-2 w-2 rotate-45 bg-primary/30"></span>
+    </div>
+
+    <footer class="mt-6">
+      {lecture && (
+        <div class="bg-primary-soft rounded-lg p-6 sm:p-7">
+          <p class="flex items-center gap-2 font-mono text-xs text-ink-muted">
+            <span class="inline-block h-1 w-1 rotate-45 bg-primary" aria-hidden="true"></span>
+            关联课程 · 第 {String(lecture.data.lectureNumber).padStart(2, '0')} 讲
+          </p>
+          <div class="mt-3">
+            <a
+              href={`${base}lectures/${lecture.id.replace('.md', '')}`}
+              class="group font-serif text-xl font-medium tracking-tight text-primary-dark hover:text-primary transition-colors"
+            >
+              {lecture.data.title}
+            </a>
+          </div>
+        </div>
+      )}
+    </footer>
+  </div>
+</CourseLayout>
