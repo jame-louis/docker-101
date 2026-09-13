@@ -5,7 +5,7 @@ import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 
 export default defineConfig({
   site: 'https://jame-louis.github.io',
-  base: '/course-template/',
+  base: '/docker-101/',
   output: 'static',
   integrations: [sitemap()],
   markdown: {
