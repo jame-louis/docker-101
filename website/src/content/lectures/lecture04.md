@@ -2,6 +2,7 @@
 title: 镜像
 lectureNumber: 4
 draft: false
+slidevUrl: slides/lecture04
 ---
 
 # 镜像
