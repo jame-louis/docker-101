@@ -9,7 +9,7 @@ highlighter: shiki
 lineNumbers: false
 drawings:
   persist: false
-transition: slide-left
+transition: fade
 mdc: true
 ---
 
@@ -18,6 +18,8 @@ mdc: true
 
 <!-- 讲者备注：【空镜】开场钩子。提问: docker run 起来的容器从哪来? 引出镜像。 -->
 
+---
+transition: slide-left
 ---
 
 ## 目标
@@ -31,6 +33,8 @@ mdc: true
 
 <!-- 讲者备注：【全景】总览三幕剧。第一幕镜像是图纸; 第二幕身份与仓库; 第三幕分层+命令。最后两个动手实践。 -->
 
+---
+layout: section
 ---
 
 # 一、镜像的"真身"
@@ -59,6 +63,8 @@ mdc: true
 <!-- 讲者备注：【特写】破除"镜像=操作系统"的最大误解。三样都没有: shell、包管理器、内核。内核共享是关键, 解释为何Linux镜像不能直接跑Windows。 -->
 
 ---
+transition: slide-left
+---
 
 # 镜像是图纸，容器是盖出来的房子
 
@@ -73,6 +79,8 @@ mdc: true
 
 <!-- 讲者备注：【全景】图纸/房子类比建立直觉。改图纸不影响已盖好的房子; 一份图纸盖无数栋。一个镜像启动多个彼此独立的容器。 -->
 
+---
+layout: section
 ---
 
 # 二、镜像的身份与仓库
@@ -92,6 +100,8 @@ mdc: true
 <!-- 讲者备注：【特写】镜像名区分项目, 标签区分版本。破除"latest永远最新"误解。同一底层数据挂多块铭牌。 -->
 
 ---
+transition: slide-left
+---
 
 # 镜像存在仓库(Registry)里，默认 Docker Hub
 
@@ -108,6 +118,8 @@ docker pull python:3.12-slim   # 省略 registry → Docker Hub
 
 <!-- 讲者备注：【全景】类比 App Store/代码托管。企业常搭私有仓库(Harbor/Nexus/阿里云) 内网分发更快更安全。 -->
 
+---
+layout: section
 ---
 
 # 三、镜像的本质:分层
@@ -158,6 +170,8 @@ Alpine 基础层 —— 被镜像 A、B、C 共同使用(只存一份)
 <!-- 讲者备注：【特写】COW机制讲透: 写时复制让只读镜像可运行、可写、可隔离。容器删除, 底层镜像不受影响。 -->
 
 ---
+transition: slide-left
+---
 
 # 常用的镜像命令
 
@@ -173,6 +187,8 @@ Alpine 基础层 —— 被镜像 A、B、C 共同使用(只存一份)
 
 <!-- 讲者备注：【全景】四大核心(pull/images/push/rmi)熟练到闭眼。tag/history/inspect/save/load 按需。commit/search/buildx/ prune 了解即可。 -->
 
+---
+layout: section
 ---
 
 # 四、实战一:拉取并解剖一个镜像
@@ -195,6 +211,8 @@ docker pull alpine:3.20     # 每个 Pull complete 对应一层
 <!-- 讲者备注：【特写】带领看输出字样。将"分层"从理论落到亲眼可见。 -->
 
 ---
+transition: slide-left
+---
 
 # history / inspect 把层列给我看
 
@@ -211,6 +229,8 @@ docker inspect alpine:3.20 --format '{{.Architecture}}'
 
 <!-- 讲者备注：【特写】history每一行=一层, 理论秒变直观。inspect 翻查看字段。再来一个同样基于Alpine的 nginx:alpine, docker images 对比体会共享体积。 -->
 
+---
+layout: section
 ---
 
 # 五、实战二:把容器变成镜像
