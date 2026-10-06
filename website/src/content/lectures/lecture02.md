@@ -1,5 +1,5 @@
 ---
-title: Ubuntu 软件安装体系与 Docker 实践完全手册
+title: 安装Docker
 lectureNumber: 2
 slidevUrl: slides/lecture02
 draft: false

@@ -2,6 +2,7 @@
 title: 容器
 lectureNumber: 5
 draft: false
+slidevUrl: slides/lecture05
 ---
 
 # 容器

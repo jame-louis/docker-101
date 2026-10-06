@@ -1,7 +1,8 @@
 ---
-title: 镜像仓库
+title: 仓库
 lectureNumber: 6
 draft: false
+slidevUrl: slides/lecture06
 ---
 
 # 镜像仓库（Registry）
