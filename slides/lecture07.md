@@ -191,11 +191,10 @@ docker network create --ip-range 172.20.5.0/24 mynet
 # 接进同一自定义网 → 容器名即主机名
 
 ```bash
-docker run --name web --network mynet nginx
-docker run --name app --network mynet python-app
+docker run -d --name c1 --network mynet alpine sleep 1d 
+docker run -it --name c2 --network mynet alpine sh 
 
-docker exec app ping web            # 直接用名字!
-curl http://web                     # web 当域名用
+> ping c1
 ```
 
 > 内嵌 DNS: 把容器名解析成 IP, 重启也不慌
@@ -278,7 +277,7 @@ docker network create --driver bridge \
   --ip-range 172.20.5.0/24 devnet
 
 docker run -d --name web --network devnet nginx
-docker run -d --name db  --network devnet mysql:8
+docker run -d --name db  --network devnet -e MYSQL_ROOT_PASSWORD='use-a-strong-password' mysql
 docker network inspect devnet | grep -A6 Containers
 ```
 
@@ -293,7 +292,7 @@ docker exec -it db nslookup web        # 名字被解析
 docker exec -it db curl http://web     # 用名字访问 nginx
 
 docker run -d --name app --network devnet \
-  --ip 172.20.5.20 --network-alias backend python:alpine
+  --ip 172.20.5.20 --network-alias backend python:alpine tail -f /dev/null
 docker exec -it web sh -c "getent hosts backend"  # 别名也行
 ```
 

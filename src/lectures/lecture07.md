@@ -174,11 +174,10 @@ docker inspect web | grep IPAddress    # 看到 172.20.5.10
 把两个容器都接进同一个自定义网络后，它们直接用容器名互相访问：
 
 ```bash
-docker run -d --name web  --network mynet nginx
-docker run -d --name app  --network mynet python-app
+docker run -d --name c1 --network mynet alpine sleep 1d 
+docker run -it --name c2 --network mynet alpine sh 
 
-docker exec app ping web               # 直接用 web 这个名字, 不需要 IP
-docker exec -it app curl http://web    # 直接用容器名当主机名
+> ping c1
 ```
 
 > **这是自定义网络的核心价值**：容器名 = 内部可用的主机名（由 Docker 内嵌 DNS 解析），容器重启 IP 变了也不影响。下一讲的"容器互联"正式用它。
@@ -220,7 +219,7 @@ docker network ls
 **第 2 步：起一个容器, 看它的网卡与 IP**
 
 ```bash
-docker run -d --name mynginx nginx
+docker run -d --name mynginx nginx:alpine
 docker exec -it mynginx ip addr         # 容器内看到 eth0(172.17.x.x)
 docker network inspect bridge | grep -A8 Containers   # 桥的视角看已接容器
 ```

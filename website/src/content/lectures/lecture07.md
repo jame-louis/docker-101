@@ -181,11 +181,10 @@ docker inspect web | grep IPAddress    # 看到 172.20.5.10
 把两个容器都接进同一个自定义网络后，它们直接用容器名互相访问：
 
 ```bash
-docker run -d --name web  --network mynet nginx
-docker run -d --name app  --network mynet python-app
+docker run -d --name c1 --network mynet alpine sleep 1d 
+docker run -it --name c2 --network mynet alpine sh 
 
-docker exec app ping web               # 直接用 web 这个名字, 不需要 IP
-docker exec -it app curl http://web    # 直接用容器名当主机名
+> ping c1
 ```
 
 > **这是自定义网络的核心价值**：容器名 = 内部可用的主机名（由 Docker 内嵌 DNS 解析），容器重启 IP 变了也不影响。下一讲的"容器互联"正式用它。
@@ -208,7 +207,7 @@ docker network disconnect mynet web    # 把 web 容器移出 mynet
 - `--hostname 名字`：设置容器内部看到的主机名（默认是容器 ID）。
 
 ```bash
-docker run -d --name db --network mynet --network-alias database mysql
+docker run -d --name db --network mynet --network-alias database -e MYSQL_ROOT_PASSWORD='use-a-strong-password' mysql
 docker exec app ping database          # 用别名 database 也能解析到 db
 ```
 
@@ -265,7 +264,7 @@ docker network ls                       # 出现 devnet
 
 ```bash
 docker run -d --name web --network devnet nginx
-docker run -d --name db  --network devnet mysql:8
+docker run -d --name db  --network devnet -e MYSQL_ROOT_PASSWORD='use-a-strong-password' mysql
 docker network inspect devnet | grep -A6 Containers
 ```
 
@@ -281,7 +280,7 @@ docker exec -it db curl http://web      # 直接用 web 名字访问 nginx
 **第 4 步：指定固定 IP 与别名**
 
 ```bash
-docker run -d --name app --network devnet --ip 172.20.5.20 --network-alias backend python:alpine
+docker run -d --name app --network devnet --ip 172.20.5.20 --network-alias backend python:alpine tail -f /dev/null
 docker exec -it web sh -c "getent hosts backend"   # 别名也能解析
 ```
 
